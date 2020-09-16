@@ -1,4 +1,34 @@
 <?php
+var_dump($_POST);
+require("../../../config.php");
+$database="if20_kaspar_kannel"
+if(isset($_POST["ideasubmit"]) and !empty($_POST["ideainput"])){
+	//loome andmebaasiga ühenduse
+	$conn = new mysqli($serverhost, $serverusername, $serverpassword, $database);
+	//valmistan ette sql käsu andmise kirjutamiseks
+	$stmt = $conn->prepare("INSERT INTO myideas (idea) VALUES(?)");
+	echo $conn->error;
+	//i = integer, d = decimal, s = string
+	$stmt->bind_param("s", $_POST["ideainput"]);
+	$stmt->execute();
+	$stmt->close();
+	$conn->close();
+}
+//loen andmebaasist senised mõtted
+$ideahtml = "";
+$conn = new mysqli($serverhost, $serverusername, $serverpassword, $database);
+$stat = $conn->prepare("SELECT idea FROM myideas");
+//seon tulemuse muutujaga
+$stmt->bind_result($ideafromdb);
+$stmt->execute();
+while($stmt->fetch()){
+	$ideahtml .= "<p>" .$ideafromdb .</p>;
+
+}
+$stmt->close();
+$conn->close();
+
+
 $username = "Kaspar Taniel Kannel";
 
 $fulltimenow = date("d.m.Y H:i:s");
@@ -40,16 +70,9 @@ if($hournow >= 8 $hournow < 18{
 		$imghtml .= '<img src="../vp_pics/' .$picfiles[$1] . '" alt=Tallinna Ülikool">';
 		
 	}
-	
+require("header.php");
 ?>
-<!DOCTYPE html>
-<html lang="et">
-<head>
-  <meta charset="utf-8">
-  <title>Kaspar Taniel Kannel meister progeja</title>
 
-</head>
-<body>
   <h1>Kaspar Taniel Kannel (1999)</h1>
   <p>See veebileht on loodud õppetöö käigus ning ei sisalda mingit tõsiseltvõetavat sisu!</p>
   <p>Leht on loodud veebiprogrammeerimise raames <a href="http://www.tlu.ee">Tallinna Ülikooli</a> Digitehnoloogia Instituudis ja muu selline jama mis ma siia kirjutama pean.</p>
@@ -57,6 +80,13 @@ if($hournow >= 8 $hournow < 18{
   <p><?php "parajasti on " .$partofday ."."; ?></p>
   <hr>
   <?php echo $imghtml; ?>
+  <hr>
+  <form>
+	<label>Kirjutage oma esimene pähe tulev mõte!</label>
+	<input type="text" name="ideainput" placeholder="mõttekoht">
+	<input type="submit" name="ideasubmit" value="Saada mõte teele!">
+	<hr>
+	<?php echo $ideahtml; ?>
 
 </body>
 </html>
